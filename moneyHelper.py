@@ -3,10 +3,10 @@ from collections import namedtuple
 import csv
 from csv import writer
 
-
 OperationAdd = namedtuple("AccountInfo", ['Name', 'Balance'])
 account_id = 1
 acc_info = []
+log_info = False
 
 
 class MoneyHelper:
@@ -28,23 +28,27 @@ class MoneyHelper:
             f_object.close()
         print('Register successful')
 
-    def addOperation(self, howMany=0.0, description=''):
+    def addOperation(self, howMany=0.0):
         self.__balance = self.__balance + howMany
         global account_id
-        acc_info.insert(2, self.__balance)
+        acc_info.append(account_id)
+        acc_info.append(self.name)
+        acc_info.append(self.__balance)
         with open('project.csv', 'a', newline='') as f_object:
             writer_object = writer(f_object)
             writer_object.writerow(acc_info)
             f_object.close()
         print('Operation add')
 
-    def minusMoney(self, howMany=0.0, description=''):
+    def minusMoney(self, howMany=0.0):
         if howMany > self.__balance:
             print('You dont have enought money')
         elif howMany < self.__balance:
             self.__balance = self.__balance - howMany
             global account_id
-            acc_info.insert(2, self.__balance)
+            acc_info.append(account_id)
+            acc_info.append(self.name)
+            acc_info.append(self.__balance)
             with open('project.csv', 'a', newline='') as f_object:
                 writer_object = writer(f_object)
                 writer_object.writerow(acc_info)
@@ -63,6 +67,24 @@ class MoneyHelper:
 
         return result
 
+    def login(self, name, project):
+        global log_info
+        global created_account
+        result = {}
+        self.name = name
+        for row in csv.reader(open(project)):
+            number = int(row[0])
+            login = row[1]
+            balance = float(row[2])
+            if self.name == login:
+                created_account = True
+                print('login successful')
+                log_info = True
+                self.__balance = balance
+
+            else:
+                print('Try again')
+
     def __del__(self):
         return self.name, self.__balance
 
@@ -71,14 +93,13 @@ user = MoneyHelper()
 created_account = False
 
 
-def engine():
+def startMenu():
     global created_account
+    global log_info
     choose = input('Menu:\n'
                    '1 - Create account\n'
-                   '2 - Add operation\n'
-                   '3 - Minus operation\n'
-                   '4 - Check account balance\n'
-                   '5 - Exit\n'
+                   '2 - Login\n'
+                   '3 - Exit\n'
                    'Choose: ')
     if choose == '1':
         name = input('Enter name: ')
@@ -87,24 +108,42 @@ def engine():
         created_account = True
         engine()
     elif choose == '2':
+        name = input('Enter name: ')
+        user.login(name, 'project.csv')
+        if log_info:
+            engine()
+        else:
+            startMenu()
+    elif choose == '3':
+        exit()
+    else:
+        print('Try again.')
+        startMenu()
+
+
+def engine():
+    global created_account
+    choose = input('Menu:\n'
+                   '1 - Add operation\n'
+                   '2 - Minus operation\n'
+                   '3 - Check account balance\n'
+                   '4 - Exit\n'
+                   'Choose: ')
+
+    if choose == '1':
         if created_account:
             howMany = float(input('How many money u wanna put: '))
-            description = input('Enter where u taked this money: ')
-            user.addOperation(howMany, description)
+            user.addOperation(howMany)
             engine()
         else:
             print('For do this operation create account!')
             engine()
-    elif choose == '3':
+    elif choose == '2':
         if created_account:
             howMany = float(input('How many money u wanna get: '))
-            description = input('Enter for what u taked this money: ')
-            user.minusMoney(howMany, description)
+            user.minusMoney(howMany)
             engine()
-        else:
-            print('For do this operation create account!')
-            engine()
-    elif choose == '4':
+    elif choose == '3':
         if created_account:
             resultMM = user.checkAccInfo('project.csv')
             print(resultMM)
@@ -112,7 +151,7 @@ def engine():
         else:
             print('For do this operation create account!')
             engine()
-    elif choose == '5':
+    elif choose == '4':
         exit()
     elif choose == '':
         print('Enter again!')
@@ -122,4 +161,4 @@ def engine():
         engine()
 
 
-engine()
+startMenu()
