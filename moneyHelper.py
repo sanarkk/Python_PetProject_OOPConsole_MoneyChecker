@@ -26,7 +26,7 @@ class MoneyHelper:
             writer_object = writer(f_object)
             writer_object.writerow(acc_info)
             f_object.close()
-        print('Register successful')
+        print('Register successful.')
 
     def addOperation(self, howMany=0.0):
         self.__balance = self.__balance + howMany
