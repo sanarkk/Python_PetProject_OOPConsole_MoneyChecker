@@ -1,11 +1,16 @@
 # MONEY HELPER FOR YOU #
+from collections import namedtuple
+import csv
+
+
+OperationAdd = namedtuple("Operation", ['Name', 'Operation', 'HowMany', 'Description'])
+
 
 class MoneyHelper:
 
     def __init__(self):
         self.name = ''
         self.__balance = 0
-        self.description = ''
 
     def registration(self, name='Unknown', balance=0.0):
         self.name = name
@@ -15,21 +20,28 @@ class MoneyHelper:
 
     def addOperation(self, howMany=0.0, description=''):
         self.__balance = self.__balance + howMany
-        self.description = description
 
         print('Operation add')
 
     def minusMoney(self, howMany=0.0, description=''):
         self.__balance = self.__balance - howMany
-        self.description = description
 
         print('Your money divided')
 
-    def info(self):
-        return self.name, self.__balance, self.description
+    def info(self, project):
+        result = {}
+        for row in csv.reader(open(project)):
+            number = int(row[0])
+            name = row[1]
+            operation = row[2]
+            howmany = float(row[3])
+            description = row[4]
+            result[number] = OperationAdd(name, operation, howmany, description)
+
+        return result
 
     def __del__(self):
-        return self.name, self.__balance, self.description
+        return self.name, self.__balance
 
 
 user = MoneyHelper()
@@ -71,7 +83,8 @@ def engine():
             engine()
     elif choose == '4':
         if created_account:
-            print(user.info())
+            resultMM = user.info('project.csv')
+            print(resultMM)
             engine()
         else:
             print('For do this operation create account!')
