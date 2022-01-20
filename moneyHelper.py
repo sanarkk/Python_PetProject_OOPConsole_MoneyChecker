@@ -14,7 +14,7 @@ OperationAdd = namedtuple("AccountInfo", ['Name', 'Balance'])
 account_id = 1
 # HERE WE STORE ACCOUNT INFO FOR UPDATE #
 acc_info = []
-# VARIABLE FOR CHECK USER LOGIN #
+# VARIABLE FOR CHECK USER LOGIN  #
 log_info = False
 # VARIABLE FOR CHECK USER REGISTRATION #
 created_account = False
