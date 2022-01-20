@@ -230,5 +230,5 @@ def engine():
         engine()
 
 
-# CALL MAIN FUNCTION TO START PROGRAM #
+# CALL MAIN FUNCTION TO START PROGRAM  #
 startMenu('project.csv')
