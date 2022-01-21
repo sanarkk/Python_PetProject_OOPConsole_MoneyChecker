@@ -8,7 +8,7 @@ acc_info = []
 
 PROJECT_URL = 'project.csv'
 
-"""USER BALANCE"""
+
 class Balance:
 
     def __init__(self):
@@ -17,9 +17,9 @@ class Balance:
     def __del__(self):
         return self.balance
 bal = Balance()
+"""USER BALANCE"""
 
 
-"""CHECK ACCOUNT STATUS"""
 class AccStatus:
     def __init__(self):
         self.login_account = False
@@ -28,9 +28,9 @@ class AccStatus:
     def __del__(self):
         return self.login_account, self.created_account
 acc = AccStatus()
+"""CHECK ACCOUNT STATUS"""
 
 
-"""USER CLASS"""
 class MoneyHelper(Balance, AccStatus):
 
     def __init__(self):
@@ -80,8 +80,8 @@ class MoneyHelper(Balance, AccStatus):
     def __del__(self):
         return self.name, self.id
 user = MoneyHelper()
+"""USER CLASS"""
 
-"""CLASS WHICH CHECK USER OPERATIONS"""
 class OperationChecker(MoneyHelper):
 
     def __init__(self):
@@ -112,6 +112,7 @@ class OperationChecker(MoneyHelper):
     def __del__(self):
         return self.operation, self.operationText
 check = OperationChecker()
+"""CLASS WHICH CHECK USER OPERATIONS"""
 
 def startMenu(project):
     user_choice = input('Menu:\n'
