@@ -6,87 +6,115 @@ import csv
 from csv import writer
 
 # DICTIONARY WHERE WE WILL STORE INFORMATION #
-OperationAdd = namedtuple("AccountInfo", ['Name', 'Balance'])
+Operation = namedtuple("AccountInfo", ['Name', 'Balance'])
 acc_info = []
 
 PROJECT_URL = 'project.csv'
 
-account_id = 1
-login_account = False
-created_account = False
-
-"""MAIN CLASS"""
-class MoneyHelper:
+"""USER BALANCE"""
+class Balance:
 
     def __init__(self):
+        self.balance = 0.0
+
+    def __del__(self):
+        return self.balance
+bal = Balance()
+
+
+"""CHECK ACCOUNT STATUS"""
+class AccStatus:
+    def __init__(self):
+        self.login_account = False
+        self.created_account = False
+
+    def __del__(self):
+        return self.login_account, self.created_account
+acc = AccStatus()
+
+
+"""USER CLASS"""
+class MoneyHelper(Balance, AccStatus):
+
+    def __init__(self):
+        super().__init__()
         self.name = ''
-        self.__balance = 0
+        self.id = 1
 
     def registration(self, name='Unknown', balance=0.0):
-        global created_account
         self.name = name
-        self.__balance = balance
-        acc_info.append(account_id)
+        bal.balance = balance
+        acc_info.append(self.id)
         acc_info.append(self.name)
-        acc_info.append(self.__balance)
+        acc_info.append(bal.balance)
         with open('project.csv', 'a', newline='') as f_object:
             writer_object = writer(f_object)
             writer_object.writerow(acc_info)
             f_object.close()
-        created_account = True
+        acc.created_account = True
         print('Register successful.')
 
-    def operation(self, how, howMany=0.0):
-        global account_id
-        balance = 0.0
-        operationText = ''
-        if how == 1:
-            balance = self.__balance + howMany
-            operationText = '\'add money\''
-        elif how == 2:
-            if howMany > self.__balance:
-                print('You don\'t have enough money')
-            else:
-                balance = self.__balance - howMany
-                operationText = '\'withdraw money\''
-        acc_info.insert(0, account_id)
-        acc_info.insert(1, self.name)
-        acc_info.insert(2, balance)
-        with open('project.csv', 'a', newline='') as f_object:
-            writer_object = writer(f_object)
-            writer_object.writerow(acc_info)
-            f_object.close()
-        print(f'Operation: {operationText}, successful.')
-
-    # CHECK BALANCE AND ACCOUNT INFO #
     @staticmethod
     def checkAccInfo(project):
         result = {}
         for row in csv.reader(open(project)):
             number = int(row[0])
             name = row[1]
-            balance = row[2]
-            result[number] = OperationAdd(name, balance)
+            bal.balance = row[2]
+            result[number] = Operation(name, bal.balance)
         return result
 
     def login(self, name, project):
-        global login_account
-        self.name = name
+        username = name
+        login = ''
         for row in csv.reader(open(project)):
             number = int(row[0])
             login = row[1]
             balance = float(row[2])
-            if self.name == login:
-                self.name = login
-                self.__balance = balance
-                login_account = True
+        if username == login:
+            self.name = login
+            bal.balance = balance
+            acc.login_account = True
+        else:
+            self.name = ''
+            acc.login_account = False
+            print('.......')
 
     def __del__(self):
-        return self.name, self.__balance
-
-
+        return self.name, self.id
 user = MoneyHelper()
 
+"""CLASS WHICH CHECK USER OPERATIONS"""
+class OperationChecker(MoneyHelper):
+
+    def __init__(self):
+        self.operation = 0
+        self.operationText = ''
+
+    def Operation(self, operation, howMany=0.0):
+        if operation == 1:
+            bal.balance = float(bal.balance) + float(howMany)
+            self.operationText = '\'add money\''
+        elif operation == 2:
+            if float(howMany) > float(bal.balance):
+                print('You don\'t have enough money')
+                self.operationText = 'not'
+            else:
+                bal.balance = float(bal.balance) - float(howMany)
+                self.operationText = '\'withdraw money\''
+
+        acc_info.insert(0, user.id)
+        acc_info.insert(1, user.name)
+        acc_info.insert(2, bal.balance)
+        with open('project.csv', 'a', newline='') as f_object:
+            writer_object = writer(f_object)
+            writer_object.writerow(acc_info)
+            f_object.close()
+        print(f'Operation: {self.operationText} successful.')
+
+    def __del__(self):
+        return self.operation, self.operationText
+check = OperationChecker()
 
 def startMenu(project):
     user_choice = input('Menu:\n'
@@ -109,7 +137,7 @@ def startMenu(project):
     elif user_choice == '2':
         user_name = input('Enter name: ')
         user.login(user_name, PROJECT_URL)
-        if login_account:
+        if acc.login_account:
             print('Login successful.')
             operationMenu()
         else:
@@ -132,11 +160,11 @@ def operationMenu():
                         'Choose: ')
     if user_choice == '1':
         user_amount = float(input('Enter amount: '))
-        user.operation(1, user_amount)
+        check.Operation(1, float(user_amount))
         operationMenu()
     elif user_choice == '2':
         user_amount = float(input('Enter amount: '))
-        user.operation(2, user_amount)
+        check.Operation(2, float(user_amount))
         operationMenu()
     elif user_choice == '3':
         account_info = user.checkAccInfo(PROJECT_URL)
