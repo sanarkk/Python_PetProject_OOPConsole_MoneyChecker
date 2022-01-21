@@ -1,8 +1,6 @@
 Hi mate
 
-This program is designed so that you can control your funds
-
-Because this program is the first version, it has bugs
+This program is designed for control your funds
 
 The essence of the program is that you enter how much money you have at the moment, and then keep a record of how much you spent or earned
 
