@@ -2,7 +2,7 @@ from collections import namedtuple
 import csv
 from csv import writer
 
-# DICTIONARY WHERE WE WILL STORE INFORMATION #
+# DICTIONARY WHERE WE WILL STORE INFORMATION  #
 Operation = namedtuple("AccountInfo", ['Name', 'Balance'])
 acc_info = []
 
