@@ -7,90 +7,61 @@ from csv import writer
 
 # DICTIONARY WHERE WE WILL STORE INFORMATION #
 OperationAdd = namedtuple("AccountInfo", ['Name', 'Balance'])
-
-# SOME VARIABLES #
-
-# USER ID #
-account_id = 1
-# HERE WE STORE ACCOUNT INFO FOR UPDATE #
 acc_info = []
-# VARIABLE FOR CHECK USER LOGIN  #
-log_info = False
-# VARIABLE FOR CHECK USER REGISTRATION #
+
+PROJECT_URL = 'project.csv'
+
+account_id = 1
+login_account = False
 created_account = False
 
-create_balance = 0
-
-# MAIN CLASS #
+"""MAIN CLASS"""
 class MoneyHelper:
-    # CONSTRUCTOR #
+
     def __init__(self):
         self.name = ''
         self.__balance = 0
 
-    # REGISTRATION METHOD #
     def registration(self, name='Unknown', balance=0.0):
-        global account_id
-        # HERE WE TAKE VALUE SROM USER #
+        global created_account
         self.name = name
         self.__balance = balance
-        create_balance = self.__balance
-        # HERE WE STORE 'acc_info' INFORMATION #
         acc_info.append(account_id)
         acc_info.append(self.name)
         acc_info.append(self.__balance)
-        # HERE WE STORE INFORMATION IN '.csv' FILE #
         with open('project.csv', 'a', newline='') as f_object:
             writer_object = writer(f_object)
             writer_object.writerow(acc_info)
             f_object.close()
+        created_account = True
         print('Register successful.')
 
-    # ADD MONEY ON BALANCE METHOD #
-    def addOperation(self, howMany=0.0):
-        # COUNT USER BALANCE AFTER ADDING MONEY #
-        self.__balance = self.__balance + howMany
-        bal = float(self.__balance)
+    def operation(self, how, howMany=0.0):
         global account_id
-        # HERE WE STORE NEW INFORMATION ABOUT USER ACCONT #
+        balance = 0.0
+        operationText = ''
+        if how == 1:
+            balance = self.__balance + howMany
+            operationText = '\'add money\''
+        elif how == 2:
+            if howMany > self.__balance:
+                print('You don\'t have enough money')
+            else:
+                balance = self.__balance - howMany
+                operationText = '\'withdraw money\''
         acc_info.insert(0, account_id)
         acc_info.insert(1, self.name)
-        acc_info.insert(2, bal)
-        # HERE WE WRITE NEW INFORMATION ABOUT USER #
+        acc_info.insert(2, balance)
         with open('project.csv', 'a', newline='') as f_object:
             writer_object = writer(f_object)
             writer_object.writerow(acc_info)
             f_object.close()
-        print('Operation add')
-
-    # MINUS MONEY FROM BALANCE #
-    def minusMoney(self, howMany=0.0):
-        # HERE WE CHECK THAT USER HAVE ENOUGHT MONEY #
-        if howMany > self.__balance:
-            print('You dont have enought money')
-        # IF HAVE ENOUGHT MONEY #
-        elif howMany < self.__balance:
-            # COUNT NEW USER BALANCE #
-            self.__balance = self.__balance - howMany
-            bal = float(self.__balance)
-            global account_id
-            # STORE NEW INFORMATION ABOUT USER #
-            acc_info.insert(0, account_id)
-            acc_info.insert(1, self.name)
-            acc_info.insert(2, bal)
-            # HERE WE WRITE NEW INFORMATION ABOUT USER #
-            with open('project.csv', 'a', newline='') as f_object:
-                writer_object = writer(f_object)
-                writer_object.writerow(acc_info)
-                f_object.close()
-            print('Your money divided')
-        else:
-            print('Try again')
+        print(f'Operation: {operationText}, successful.')
 
     # CHECK BALANCE AND ACCOUNT INFO #
-    def checkAccInfo(self, project):
+    @staticmethod
+    def checkAccInfo(project):
         result = {}
-        # HERE WE SHOW ALL INFORMATION ABOUT USER #
         for row in csv.reader(open(project)):
             number = int(row[0])
             name = row[1]
@@ -98,137 +69,88 @@ class MoneyHelper:
             result[number] = OperationAdd(name, balance)
         return result
 
-    # LOGIN METHOD #
     def login(self, name, project):
-        main_bal = 0
-        # CHECK TWO VARIABLES #
-        global log_info
-        global created_account
-        result = {}
-        # STORE USER INPUT FOR CHECK #
+        global login_account
         self.name = name
-        # CHECKING IF USER INPUT EXIST IN '.csv' FILE #
         for row in csv.reader(open(project)):
             number = int(row[0])
             login = row[1]
             balance = float(row[2])
-            main_bal = balance
-            # IF NAME EXIST #
             if self.name == login:
-                # HERE WE CHANGE VARIABLE TO TRUE #
-                created_account = True
-                log_info = True
                 self.name = login
                 self.__balance = balance
+                login_account = True
 
-
-    # DESTRUCTOR #
     def __del__(self):
         return self.name, self.__balance
 
 
-# STORE CLASS IN VARIABLE FOR FUTURE USE #
 user = MoneyHelper()
 
 
-# FUNCTION WITH START MENU #
 def startMenu(project):
-    global created_account
-    global log_info
-    # HERE START MENU #
-    choose = input('Menu:\n'
-                   '1 - Create account\n'
-                   '2 - Login\n'
-                   '3 - Exit\n'
-                   'Choose: ')
-    # HERE WE CHECKING USER CHOICE FOR KNOW WHAT TO DO #
-    if choose == '1':
-        checkNumber = ''
+    user_choice = input('Menu:\n'
+                        '1 - Create account\n'
+                        '2 - Login\n'
+                        '3 - Exit\n'
+                        'Choose: ')
+    if user_choice == '1':
+        check_exist_id = ''
         for row in csv.reader(open(project)):
-            checkNumber = row[0]
-        if checkNumber == '1':
+            check_exist_id = row[0]
+        if check_exist_id == '1':
             print('You have account. Just login.')
-            startMenu('project.csv')
+            startMenu(PROJECT_URL)
         else:
-            # HERE USER ENTER NAME #
-            name = input('Enter name: ')
-            # HERE USER ENTRE BALANCE #
-            balance = float(input('Enter balance: '))
-            # HERE CALL METHOD TO REGISTER NEW USER #
-            user.registration(name, balance)
-            # CHANGE VARIABLE TO TRUE #
-            created_account = True
-            # CALL MAIN MENU #
-            engine()
-    elif choose == '2':
-        # USER INPUT NAME FOR CHECK IF ITS EXIST #
-        name = input('Enter name: ')
-        # CALL METHOD FROM CLASS TO CHECK #
-        user.login(name, 'project.csv')
-        # IF EXIST CALL FUNCTION WITH MAIN MENU #
-        if log_info:
+            user_name = input('Enter name: ')
+            user_balance = float(input('Enter balance: '))
+            user.registration(user_name, user_balance)
+            operationMenu()
+    elif user_choice == '2':
+        user_name = input('Enter name: ')
+        user.login(user_name, PROJECT_URL)
+        if login_account:
             print('Login successful.')
-            engine()
+            operationMenu()
         else:
             print('Try again or register.')
-            startMenu('project.csv')
-    elif choose == '3':
+            startMenu(PROJECT_URL)
+    elif user_choice == '3':
         exit()
     else:
         print('Try again.')
-        startMenu('project.csv')
+        startMenu(PROJECT_URL)
 
 
 # FUNCTION WITH MAIN MENU AND ENGINE #
-def engine():
-    global created_account
-    # HERE MEIN MENU #
-    choose = input('Menu:\n'
-                   '1 - Add operation\n'
-                   '2 - Minus operation\n'
-                   '3 - Check account balance\n'
-                   '4 - Exit\n'
-                   'Choose: ')
-    # HERE WE CHECK USER CHOICE FOR KNOW WHAT TO DO #
-    if choose == '1':
-        # CHECK IF ACCOUNT CREATED USER CAN ADD MONEY #
-        if created_account:
-            # HERE ENTER HOW MANY MONEY #
-            howMany = float(input('How many money u wanna put: '))
-            # HERE CALL METHOD FROM CLASS TO ADD MONEY #
-            user.addOperation(howMany)
-            # CALL MAIN MENU #
-            engine()
-        else:
-            print('For do this operation create account!')
-            engine()
-    elif choose == '2':
-        # CHECK IF ACCOUNT CREATED USER CAN DIVIDE MONEY #
-        if created_account:
-            # HERE ENTER HOW MANY MONEY #
-            howMany = float(input('How many money u wanna get: '))
-            # HERE CALL METHOD FROM CLASS TO DIVIDE MONEY #
-            user.minusMoney(howMany)
-            # CALL MAIN MENU #
-            engine()
-    elif choose == '3':
-        # CHECK IF ACCOUNT CREATED USER CAN CHECK HIS INFO #
-        if created_account:
-            resultMM = user.checkAccInfo('project.csv')
-            print(resultMM)
-            engine()
-        else:
-            print('For do this operation create account!')
-            engine()
-    elif choose == '4':
+def operationMenu():
+    user_choice = input('Menu:\n'
+                        '1 - Operation: \'add money\'\n'
+                        '2 - Operation: \'withdraw money\'\n'
+                        '3 - Check account balance\n'
+                        '4 - Exit\n'
+                        'Choose: ')
+    if user_choice == '1':
+        user_amount = float(input('Enter amount: '))
+        user.operation(1, user_amount)
+        operationMenu()
+    elif user_choice == '2':
+        user_amount = float(input('Enter amount: '))
+        user.operation(2, user_amount)
+        operationMenu()
+    elif user_choice == '3':
+        account_info = user.checkAccInfo(PROJECT_URL)
+        print(account_info)
+        operationMenu()
+    elif user_choice == '4':
         exit()
-    elif choose == '':
+    elif user_choice == '':
         print('Enter again!')
-        engine()
+        operationMenu()
     else:
         print('Enter again!')
-        engine()
+        operationMenu()
 
 
-# CALL MAIN FUNCTION TO START PROGRAM  #
-startMenu('project.csv')
+if __name__ == "__main__":
+    startMenu(PROJECT_URL)
