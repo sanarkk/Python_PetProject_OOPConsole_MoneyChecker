@@ -1,6 +1,3 @@
-# MONEY HELPER FOR YOU #
-
-# IMPORT ALL NEED LIBRARIES #
 from collections import namedtuple
 import csv
 from csv import writer
